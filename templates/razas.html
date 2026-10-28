@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}Razas{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3 titulo"><span class="icono-titulo"><i class="bi bi-tags-fill"></i></span>Razas</h1>
+<div style="max-width: 560px">
+  <form method="post" class="d-flex gap-2 mb-3">
+    <input name="nombre" class="form-control" placeholder="Nueva raza" required maxlength="60">
+    <button class="btn btn-primario text-nowrap">+ Agregar</button>
+  </form>
+
+  <ul class="list-group shadow-sm">
+    {% for r in razas %}
+    <li class="list-group-item d-flex align-items-center gap-2">
+      {# Para renombrar: cambias el texto y presionas Guardar #}
+      <form method="post" action="{{ url_for('razas.renombrar', id=r.id) }}" class="d-flex gap-2 flex-grow-1">
+        <input name="nombre" class="form-control form-control-sm" value="{{ r.nombre }}" required maxlength="60">
+        <button class="btn btn-sm btn-outline-secondary">Guardar</button>
+      </form>
+      <span class="badge text-bg-light" title="Cerdos con esta raza">{{ r.cerdos }}</span>
+      <form method="post" action="{{ url_for('razas.eliminar', id=r.id) }}"
+            onsubmit='return confirm({{ ("¿Eliminar la raza " ~ r.nombre ~ "?")|tojson }})'>
+        <button class="btn btn-sm btn-outline-danger">✕</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

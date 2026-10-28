@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block titulo %}Salidas{% endblock %}
+{% block contenido %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0 titulo"><span class="icono-titulo"><i class="bi bi-truck"></i></span>Salidas</h1>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('salidas.nueva', tipo='venta') }}" class="btn btn-primario">+ Venta</a>
+    <a href="{{ url_for('salidas.nueva', tipo='muerte') }}" class="btn btn-outline-secondary">+ Muerte</a>
+  </div>
+</div>
+
+{# Filtros: por defecto, el año actual #}
+<form method="get" class="row g-2 mb-3">
+  <div class="col-6 col-md-3">
+    <label class="form-label small mb-0">Desde</label>
+    <input name="desde" type="date" class="form-control" value="{{ filtros.desde }}">
+  </div>
+  <div class="col-6 col-md-3">
+    <label class="form-label small mb-0">Hasta</label>
+    <input name="hasta" type="date" class="form-control" value="{{ filtros.hasta }}">
+  </div>
+  <div class="col-6 col-md-3">
+    <label class="form-label small mb-0">Tipo</label>
+    <select name="tipo" class="form-select">
+      <option value="">Ventas y muertes</option>
+      <option value="venta" {{ "selected" if filtros.tipo == "venta" }}>Solo ventas</option>
+      <option value="muerte" {{ "selected" if filtros.tipo == "muerte" }}>Solo muertes</option>
+    </select>
+  </div>
+  <div class="col-6 col-md-3 d-flex align-items-end gap-2">
+    <button class="btn btn-primario flex-grow-1">Filtrar</button>
+    <a href="{{ url_for('salidas.lista') }}" class="btn btn-outline-secondary">Este año</a>
+  </div>
+</form>
+
+{% set r = resumen %}
+<div class="row g-2 mb-3">
+  {% for titulo, valor in [("Cerdos vendidos", r.ventas), ("Ingresos", r.ingresos|dinero), ("Kg vendidos", r.kg_vendidos|kg),
+                           ("Precio promedio por kg", r.precio_kg|dinero if r.precio_kg else "—"), ("Muertes", r.muertes)] %}
+  <div class="col-6 col-md"><div class="card card-body shadow-sm py-2 text-center h-100">
+    <div class="small text-muted">{{ titulo }}</div>
+    <div class="fs-5 fw-semibold">{{ valor }}</div>
+  </div></div>
+  {% endfor %}
+</div>
+
+{% if causas %}
+<p class="small mb-3">
+  <span class="text-muted">Causas de muerte:</span>
+  {% for causa, n in causas %}<span class="badge text-bg-light border me-1">{{ causa }} · {{ n }}</span>{% endfor %}
+</p>
+{% endif %}
+
+{% if salidas %}
+<div class="table-responsive card shadow-sm">
+  <table class="table table-hover align-middle mb-0">
+    <thead><tr><th>Fecha</th><th>Cerdo</th><th>Tipo</th><th class="text-end">Peso</th><th class="text-end">Precio</th><th>Comprador / causa</th><th></th></tr></thead>
+    <tbody>
+    {% for s in salidas %}
+      <tr>
+        <td class="text-nowrap">{{ s.fecha|fecha }}</td>
+        <td class="text-nowrap"><a href="{{ url_for('cerdos.ficha', id=s.cerdo_id) }}#salida">{{ s.arete }}</a>{% if s.nombre %} · {{ s.nombre }}{% endif %}</td>
+        <td>{% if s.tipo == "venta" %}<span class="badge text-bg-primary">Venta</span>{% else %}<span class="badge text-bg-secondary">Muerte</span>{% endif %}</td>
+        <td class="text-end text-nowrap">{{ s.peso_kg|kg }}</td>
+        <td class="text-end text-nowrap">{{ s.precio|dinero }}
+          {% if s.precio and s.peso_kg %}<div class="small text-muted">{{ (s.precio / s.peso_kg)|dinero }}/kg</div>{% endif %}</td>
+        <td>{{ s.comprador or s.causa or "—" }}</td>
+        <td class="text-end"><a href="{{ url_for('salidas.editar', id=s.id) }}" class="btn btn-sm btn-outline-secondary">Editar</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  {% set mensaje %}No hay salidas entre {{ filtros.desde|fecha }} y {{ filtros.hasta|fecha }}.{% endset %}{% include "_vacio.html" %}
+{% endif %}
+{% endblock %}

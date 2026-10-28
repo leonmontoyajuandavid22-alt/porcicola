@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block clase_body %}seccion-login pagina-login{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center" style="margin-top: 12vh">
+  <div class="col-sm-8 col-md-5 col-lg-4">
+    <div class="card tarjeta-login shadow-sm text-center p-4 pt-0">
+      <div><img src="{{ url_for('static', filename='img/logo.svg') }}" class="logo" alt="Logo de Porcícola"></div>
+      <h1 class="h3 fw-bold mt-3 mb-0">Porcícola</h1>
+      <p class="text-muted">Registro de la granja</p>
+      <form method="post" class="text-start">
+        <label class="form-label fw-semibold">Usuario</label>
+        <div class="input-group mb-3">
+          <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+          <input name="usuario" class="form-control" required autofocus autocomplete="username">
+        </div>
+        <label class="form-label fw-semibold">Contraseña</label>
+        <div class="input-group mb-4">
+          <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
+          <input name="clave" type="password" class="form-control" required autocomplete="current-password">
+        </div>
+        <button class="btn btn-primario w-100 py-2"><i class="bi bi-box-arrow-in-right me-1"></i> Entrar</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

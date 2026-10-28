@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titulo %}Corrales{% endblock %}
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0 titulo"><span class="icono-titulo"><i class="bi bi-house-door-fill"></i></span>Corrales</h1>
+  <a href="{{ url_for('corrales.nuevo') }}" class="btn btn-primario">+ Nuevo corral</a>
+</div>
+
+{% if not corrales %}
+  {% with mensaje='Todavía no hay corrales. Crea el primero con el botón "Nuevo corral".' %}{% include "_vacio.html" %}{% endwith %}
+{% endif %}
+
+<div class="row g-3">
+  {% for co in corrales %}
+  <div class="col-sm-6 col-lg-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 card-title">{{ co.nombre }}</h2>
+        <p class="mb-1">
+          <strong>{{ co.cerdos_activos }}</strong> cerdo(s) activo(s)
+          {% if co.capacidad %} de {{ co.capacidad }}{% endif %}
+        </p>
+        {% if co.capacidad and co.cerdos_activos > co.capacidad %}
+          <span class="badge text-bg-warning">Sobrepasa la capacidad</span>
+        {% endif %}
+        {% if co.descripcion %}<p class="text-muted small mt-2 mb-0">{{ co.descripcion }}</p>{% endif %}
+      </div>
+      <div class="card-footer bg-white d-flex gap-2">
+        <a href="{{ url_for('cerdos.lista', corral=co.id) }}" class="btn btn-sm btn-outline-secondary">Ver cerdos</a>
+        <a href="{{ url_for('corrales.editar', id=co.id) }}" class="btn btn-sm btn-outline-secondary">Editar</a>
+        <form method="post" action="{{ url_for('corrales.eliminar', id=co.id) }}" class="ms-auto"
+              onsubmit='return confirm({{ ("¿Eliminar el corral " ~ co.nombre ~ "?")|tojson }})'>
+          <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

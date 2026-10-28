@@ -1,0 +1,30 @@
+{# Lista de próximas dosis. Espera "pendientes", "hoy" y "volver" ("ficha" o ""). #}
+<ul class="list-group shadow-sm">
+  {% for s in pendientes %}
+    {% set dias = (s.proxima_fecha - hoy).days %}
+    <li class="list-group-item d-flex flex-wrap align-items-center gap-2">
+      <div class="flex-grow-1">
+        <div>
+          {% include "salud/_tipo.html" %}
+          <strong>{{ s.descripcion }}</strong>
+          {% if volver != "ficha" %}
+            — <a href="{{ url_for('cerdos.ficha', id=s.cerdo_id) }}#salud">{{ s.arete }}</a>{% if s.nombre %} · {{ s.nombre }}{% endif %}
+          {% endif %}
+        </div>
+        <div class="small {{ 'text-danger fw-semibold' if dias < 0 else 'text-muted' }}">
+          {{ s.proxima_fecha|fecha }} ·
+          {% if dias < 0 %}vencida hace {{ -dias }} día(s){% elif dias == 0 %}¡es hoy!{% else %}en {{ dias }} día(s){% endif %}
+        </div>
+      </div>
+      {# "Aplicar" abre el formulario ya lleno con los datos de la dosis anterior #}
+      <a class="btn btn-sm btn-primario"
+         href="{{ url_for('salud.nuevo', cerdo=s.cerdo_id, tipo=s.tipo, descripcion=s.descripcion,
+                          medicamento=s.medicamento or '', dosis=s.dosis or '', pendiente_id=s.id, volver=volver) }}">Aplicar</a>
+      <form method="post" action="{{ url_for('salud.descartar', id=s.id) }}"
+            onsubmit="return confirm('¿Quitar esta dosis de pendientes sin registrarla?')">
+        <input type="hidden" name="volver" value="{{ volver }}">
+        <button class="btn btn-sm btn-outline-secondary" title="Ya no se va a aplicar">Descartar</button>
+      </form>
+    </li>
+  {% endfor %}
+</ul>

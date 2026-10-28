@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block titulo %}{{ "Editar" if editando else "Nuevo" }} cerdo{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3 titulo"><span class="icono-titulo"><i class="bi bi-piggy-bank-fill"></i></span>{{ "Editar cerdo " ~ cerdo.arete if editando else "Nuevo cerdo" }}</h1>
+
+{# enctype="multipart/form-data" es necesario para poder enviar la foto #}
+<form method="post" enctype="multipart/form-data" class="card card-body shadow-sm" style="max-width: 760px">
+  <div class="row g-3">
+    <div class="col-sm-6">
+      <label class="form-label">Arete / identificación *</label>
+      <input name="arete" class="form-control" required maxlength="30" value="{{ cerdo.arete or '' }}">
+    </div>
+    <div class="col-sm-6">
+      <label class="form-label">Nombre</label>
+      <input name="nombre" class="form-control" maxlength="60" value="{{ cerdo.nombre or '' }}">
+    </div>
+
+    <div class="col-sm-6">
+      <label class="form-label">Sexo *</label>
+      <select name="sexo" class="form-select" required>
+        <option value="">Elige...</option>
+        <option value="hembra" {{ "selected" if cerdo.sexo == "hembra" }}>Hembra</option>
+        <option value="macho" {{ "selected" if cerdo.sexo == "macho" }}>Macho</option>
+      </select>
+    </div>
+    <div class="col-sm-6">
+      <label class="form-label">Raza</label>
+      <select name="raza_id" class="form-select">
+        <option value="">Sin especificar</option>
+        {% for r in razas %}
+          <option value="{{ r.id }}" {{ "selected" if cerdo.raza_id|string == r.id|string }}>{{ r.nombre }}</option>
+        {% endfor %}
+      </select>
+      <div class="form-text">¿Falta una raza? Agrégala en <a href="{{ url_for('razas.lista') }}">Razas</a>.</div>
+    </div>
+
+    <div class="col-sm-6">
+      <label class="form-label">Fecha de nacimiento</label>
+      <input name="fecha_nacimiento" type="date" class="form-control" value="{{ cerdo.fecha_nacimiento or '' }}">
+    </div>
+    <div class="col-sm-6">
+      <label class="form-label">Corral</label>
+      <select name="corral_id" class="form-select">
+        <option value="">Sin corral</option>
+        {% for co in corrales %}
+          <option value="{{ co.id }}" {{ "selected" if cerdo.corral_id|string == co.id|string }}>{{ co.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-sm-6">
+      <label class="form-label">Madre</label>
+      <select name="madre_id" class="form-select">
+        <option value="">Desconocida</option>
+        {% for m in madres %}
+          <option value="{{ m.id }}" {{ "selected" if cerdo.madre_id|string == m.id|string }}>{{ m.arete }}{% if m.nombre %} · {{ m.nombre }}{% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-sm-6">
+      <label class="form-label">Padre</label>
+      <select name="padre_id" class="form-select">
+        <option value="">Desconocido</option>
+        {% for p in padres %}
+          <option value="{{ p.id }}" {{ "selected" if cerdo.padre_id|string == p.id|string }}>{{ p.arete }}{% if p.nombre %} · {{ p.nombre }}{% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-sm-6">
+      <label class="form-label">Estado</label>
+      <div class="form-control-plaintext">
+        {{ (cerdo.estado or "activo")|capitalize }}
+        <div class="form-text mt-0">Cambia solo al registrar una venta o una muerte en "Salidas".</div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <label class="form-label">Foto (opcional)</label>
+      <input name="foto" type="file" accept="image/jpeg,image/png,image/webp" class="form-control">
+      {% if cerdo.foto %}
+        <div class="d-flex align-items-center gap-2 mt-2">
+          <img src="{{ url_for('static', filename='fotos/' ~ cerdo.foto) }}" class="foto-mini" alt="">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="quitar_foto" id="quitar_foto">
+            <label class="form-check-label" for="quitar_foto">Quitar foto actual</label>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Observaciones</label>
+      <textarea name="observaciones" class="form-control" rows="3">{{ cerdo.observaciones or '' }}</textarea>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2 mt-4">
+    <button class="btn btn-primario">Guardar</button>
+    <a href="{{ url_for('cerdos.ficha', id=cerdo.id) if editando else url_for('cerdos.lista') }}"
+       class="btn btn-outline-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

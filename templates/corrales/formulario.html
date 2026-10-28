@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}{{ "Editar" if editando else "Nuevo" }} corral{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3 titulo"><span class="icono-titulo"><i class="bi bi-house-door-fill"></i></span>{{ "Editar" if editando else "Nuevo" }} corral</h1>
+<form method="post" class="card card-body shadow-sm" style="max-width: 520px">
+  <label class="form-label">Nombre *</label>
+  <input name="nombre" class="form-control mb-3" required maxlength="60" value="{{ corral.nombre or '' }}">
+  <label class="form-label">Capacidad (número de cerdos)</label>
+  <input name="capacidad" type="number" min="1" class="form-control mb-3" value="{{ corral.capacidad or '' }}">
+  <label class="form-label">Descripción</label>
+  <input name="descripcion" class="form-control mb-3" maxlength="255" value="{{ corral.descripcion or '' }}"
+         placeholder="Ej. Maternidad, engorde, verracos...">
+  <div class="d-flex gap-2">
+    <button class="btn btn-primario">Guardar</button>
+    <a href="{{ url_for('corrales.lista') }}" class="btn btn-outline-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

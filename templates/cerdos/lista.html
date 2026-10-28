@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block titulo %}Cerdos{% endblock %}
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0 titulo"><span class="icono-titulo"><i class="bi bi-piggy-bank-fill"></i></span>Cerdos</h1>
+  <a href="{{ url_for('cerdos.nuevo', corral=filtros.corral if filtros.corral != 'sin' else None) }}"
+     class="btn btn-primario">+ Nuevo cerdo</a>
+</div>
+
+{# Buscador y filtros: al presionar "Filtrar" se recarga la página con los filtros en la dirección #}
+<form method="get" class="card card-body shadow-sm mb-3">
+  <div class="row g-2">
+    <div class="col-12 col-md-4">
+      <input name="buscar" class="form-control" placeholder="Buscar por arete o nombre" value="{{ filtros.buscar }}">
+    </div>
+    <div class="col-6 col-md-2">
+      <select name="corral" class="form-select">
+        <option value="">Todos los corrales</option>
+        {% for co in corrales %}
+          <option value="{{ co.id }}" {{ "selected" if filtros.corral == co.id|string }}>{{ co.nombre }}</option>
+        {% endfor %}
+        <option value="sin" {{ "selected" if filtros.corral == "sin" }}>Sin corral</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <select name="sexo" class="form-select">
+        <option value="">Ambos sexos</option>
+        <option value="hembra" {{ "selected" if filtros.sexo == "hembra" }}>Hembras</option>
+        <option value="macho" {{ "selected" if filtros.sexo == "macho" }}>Machos</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <select name="estado" class="form-select">
+        <option value="activo" {{ "selected" if filtros.estado == "activo" }}>Activos</option>
+        <option value="vendido" {{ "selected" if filtros.estado == "vendido" }}>Vendidos</option>
+        <option value="muerto" {{ "selected" if filtros.estado == "muerto" }}>Muertos</option>
+        <option value="todos" {{ "selected" if filtros.estado == "todos" }}>Todos</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-2 d-flex gap-2">
+      <button class="btn btn-primario flex-grow-1">Filtrar</button>
+      <a href="{{ url_for('cerdos.lista') }}" class="btn btn-outline-secondary" title="Quitar filtros">✕</a>
+    </div>
+  </div>
+</form>
+
+<p class="text-muted small">{{ cerdos|length }} cerdo(s) encontrados</p>
+
+{% if cerdos %}
+<div class="table-responsive card shadow-sm">
+  <table class="table table-hover align-middle mb-0">
+    <thead>
+      <tr><th></th><th>Arete</th><th>Nombre</th><th>Sexo</th><th>Raza</th><th>Edad</th><th class="text-end">Peso</th><th>Corral</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+    {% for c in cerdos %}
+      <tr onclick="location.href='{{ url_for('cerdos.ficha', id=c.id) }}'" style="cursor: pointer">
+        <td>
+          {% if c.foto %}
+            <img src="{{ url_for('static', filename='fotos/' ~ c.foto) }}" class="foto-mini" alt="">
+          {% else %}
+            <img src="{{ url_for('static', filename='img/cerdo.svg') }}" class="foto-mini" alt="Sin foto">
+          {% endif %}
+        </td>
+        <td><a href="{{ url_for('cerdos.ficha', id=c.id) }}" class="fw-semibold">{{ c.arete }}</a></td>
+        <td>{{ c.nombre or "—" }}</td>
+        <td>{{ "♀ Hembra" if c.sexo == "hembra" else "♂ Macho" }}</td>
+        <td>{{ c.raza or "—" }}</td>
+        <td class="text-nowrap">{{ c.fecha_nacimiento|edad }}</td>
+        <td class="text-end text-nowrap">{{ c.ultimo_peso ~ " kg" if c.ultimo_peso else "—" }}</td>
+        <td>{{ c.corral or "—" }}</td>
+        <td>{% include "cerdos/_estado.html" %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  {% with mensaje="No hay cerdos con esos filtros." %}{% include "_vacio.html" %}{% endwith %}
+{% endif %}
+{% endblock %}

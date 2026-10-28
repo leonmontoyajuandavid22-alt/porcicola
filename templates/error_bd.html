@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titulo %}Error de base de datos{% endblock %}
+{% block contenido %}
+<div class="alert alert-danger">
+  <h1 class="h4">No se pudo usar la base de datos</h1>
+  <p>Revisa que:</p>
+  <ol>
+    <li>En el panel de XAMPP, <strong>MySQL</strong> esté encendido (en verde).</li>
+    <li>Hayas ejecutado <code>python crear_base_datos.py</code> al menos una vez.</li>
+  </ol>
+  <p class="mb-0 small">Detalle técnico: <code>{{ error }}</code></p>
+</div>
+{% endblock %}

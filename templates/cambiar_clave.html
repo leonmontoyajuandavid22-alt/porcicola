@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}Cambiar contraseña{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3 titulo"><span class="icono-titulo"><i class="bi bi-key-fill"></i></span>Cambiar contraseña</h1>
+<form method="post" class="card card-body shadow-sm" style="max-width: 420px">
+  <label class="form-label">Contraseña actual</label>
+  <input name="actual" type="password" class="form-control mb-3" required autocomplete="current-password">
+  <label class="form-label">Nueva contraseña (mínimo 6 caracteres)</label>
+  <input name="nueva" type="password" class="form-control mb-3" required minlength="6" autocomplete="new-password">
+  <label class="form-label">Repite la nueva contraseña</label>
+  <input name="repetir" type="password" class="form-control mb-3" required minlength="6" autocomplete="new-password">
+  <button class="btn btn-primario">Guardar</button>
+</form>
+{% endblock %}

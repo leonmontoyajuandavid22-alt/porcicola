@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio{% endblock %}
+{% block contenido %}
+{% set meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+                "septiembre", "octubre", "noviembre", "diciembre"] %}
+{# Banner con el dibujo de la granja (static/img/granja.svg) #}
+<div class="banner">
+  <div class="banner-saludo">
+    <h1 class="h3 fw-bold mb-0">¡Hola, {{ g.usuario.nombre }}! 👋</h1>
+    <div class="text-muted">Resumen de la granja · {{ hoy|fecha }}</div>
+  </div>
+</div>
+
+{# ---------- Números principales ---------- #}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('cerdos.lista') }}" class="card card-body shadow-sm text-decoration-none h-100 tarjeta-numero t-rosa">
+      <span class="icono-tarjeta"><i class="bi bi-piggy-bank-fill"></i></span>
+      <div class="small text-muted">Cerdos activos</div>
+      <div class="display-6 fw-semibold">{{ total }}</div>
+      <div class="small text-muted">♀ {{ hembras }} hembras · ♂ {{ machos }} machos</div>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('salud.lista') }}" class="card card-body shadow-sm text-decoration-none h-100 tarjeta-numero t-rojo">
+      <span class="icono-tarjeta"><i class="bi bi-heart-pulse-fill"></i></span>
+      <div class="small text-muted">Vacunas y dosis próximas</div>
+      <div class="display-6 fw-semibold {{ 'text-danger' if vacunas|selectattr('proxima_fecha', 'lt', hoy)|list }}">{{ vacunas|length }}</div>
+      <div class="small text-muted">en los próximos {{ dias_aviso }} días</div>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('reproduccion.inicio') }}" class="card card-body shadow-sm text-decoration-none h-100 tarjeta-numero t-morado">
+      <span class="icono-tarjeta"><i class="bi bi-balloon-heart-fill"></i></span>
+      <div class="small text-muted">Partos próximos</div>
+      <div class="display-6 fw-semibold">{{ partos|length }}</div>
+      <div class="small text-muted">en los próximos {{ dias_aviso }} días</div>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('pesajes.lista') }}" class="card card-body shadow-sm text-decoration-none h-100 tarjeta-numero t-naranja">
+      <span class="icono-tarjeta"><i class="bi bi-graph-up-arrow"></i></span>
+      <div class="small text-muted">Sin pesar hace +30 días</div>
+      <div class="display-6 fw-semibold {{ 'text-warning' if sin_pesar }}">{{ sin_pesar }}</div>
+      <div class="small text-muted">cerdos activos</div>
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  {# ---------- Próximas vacunas ---------- #}
+  <div class="col-lg-6">
+    <h2 class="h5"><i class="bi bi-capsule text-danger"></i> Próximas vacunas y dosis</h2>
+    {% if vacunas %}
+      {% with pendientes=vacunas, volver="", tipos=tipos %}{% include "salud/_pendientes.html" %}{% endwith %}
+    {% else %}
+      <p class="text-muted">No hay dosis pendientes en los próximos {{ dias_aviso }} días.</p>
+    {% endif %}
+  </div>
+
+  {# ---------- Próximos partos ---------- #}
+  <div class="col-lg-6">
+    <h2 class="h5"><i class="bi bi-balloon-heart-fill" style="color:#a855c7"></i> Próximos partos</h2>
+    {% if partos %}
+      <ul class="list-group shadow-sm">
+        {% with volver="" %}{% for m in partos %}{% include "reproduccion/_proximo_parto.html" %}{% endfor %}{% endwith %}
+      </ul>
+    {% else %}
+      <p class="text-muted">No hay partos en los próximos {{ dias_aviso }} días.</p>
+    {% endif %}
+
+    {% if destetes %}
+    <h2 class="h5 mt-4"><i class="bi bi-cup-hot-fill text-warning"></i> Destetes pendientes</h2>
+    <ul class="list-group shadow-sm">
+      {% for p in destetes %}
+        {% set dias = (hoy - p.fecha).days %}
+        <li class="list-group-item d-flex align-items-center gap-2">
+          <div class="flex-grow-1">
+            <a href="{{ url_for('cerdos.ficha', id=p.cerda_id) }}#reproduccion" class="fw-semibold">{{ p.cerda_arete }}</a>
+            · {{ p.lechones_vivos }} lechones
+            <div class="small {{ 'text-danger fw-semibold' if dias >= dias_destete else 'text-muted' }}">Parió hace {{ dias }} día(s)</div>
+          </div>
+          <a href="{{ url_for('reproduccion.destete', id=p.id) }}" class="btn btn-sm btn-primario">Destetar</a>
+        </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+
+  {# ---------- Corrales ---------- #}
+  <div class="col-lg-6">
+    <h2 class="h5"><i class="bi bi-house-door-fill" style="color:#8d6e63"></i> Cerdos por corral</h2>
+    {% if corrales or sin_corral %}
+    <ul class="list-group shadow-sm">
+      {% for co in corrales %}
+        <a href="{{ url_for('cerdos.lista', corral=co.id) }}" class="list-group-item list-group-item-action d-flex justify-content-between">
+          <span>{{ co.nombre }}</span>
+          <span class="{{ 'text-danger fw-semibold' if co.capacidad and co.n > co.capacidad }}">
+            {{ co.n }}{% if co.capacidad %} / {{ co.capacidad }}{% endif %}</span>
+        </a>
+      {% endfor %}
+      {% if sin_corral %}
+        <a href="{{ url_for('cerdos.lista', corral='sin') }}" class="list-group-item list-group-item-action d-flex justify-content-between text-muted">
+          <span>Sin corral</span><span>{{ sin_corral }}</span>
+        </a>
+      {% endif %}
+    </ul>
+    {% else %}
+      <p class="text-muted">Todavía no hay corrales. <a href="{{ url_for('corrales.nuevo') }}">Crea el primero</a>.</p>
+    {% endif %}
+  </div>
+
+  {# ---------- El mes en números ---------- #}
+  <div class="col-lg-6">
+    <h2 class="h5"><i class="bi bi-calendar3 text-primary"></i> Este mes ({{ meses[hoy.month - 1] }})</h2>
+    <div class="card card-body shadow-sm">
+      <table class="table table-sm mb-0">
+        <tbody>
+          <tr><td>Gasto en alimentación</td><td class="text-end">{{ mes.alimentacion|dinero }}</td></tr>
+          <tr><td>Gasto en salud</td><td class="text-end">{{ mes.salud|dinero }}</td></tr>
+          <tr class="fw-semibold"><td>Total gastos</td><td class="text-end">{{ mes.gastos|dinero }}</td></tr>
+          <tr><td>Ventas ({{ mes.vendidos }} cerdos)</td><td class="text-end">{{ mes.ventas|dinero }}</td></tr>
+          <tr class="fw-semibold"><td>Ventas menos gastos</td>
+            <td class="text-end {{ 'text-danger' if mes.ventas < mes.gastos else 'text-success' }}">{{ (mes.ventas - mes.gastos)|dinero }}</td></tr>
+          <tr><td>Lechones nacidos vivos</td><td class="text-end">{{ mes.nacidos }}</td></tr>
+          <tr><td>Muertes</td><td class="text-end">{{ mes.muertes }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

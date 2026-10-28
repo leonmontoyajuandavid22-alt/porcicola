@@ -1,0 +1,22 @@
+{# Tabla de registros de alimentación. Espera "registros" y "volver". #}
+<div class="table-responsive card shadow-sm">
+  <table class="table table-sm table-hover align-middle mb-0">
+    <thead><tr><th>Fecha</th><th>Para</th><th>Alimento</th><th class="text-end">Cantidad</th><th class="text-end">Costo</th><th></th></tr></thead>
+    <tbody>
+    {% for a in registros %}
+      <tr>
+        <td class="text-nowrap">{{ a.fecha|fecha }}</td>
+        <td class="text-nowrap">
+          {% if a.cerdo_id %}🐖 <a href="{{ url_for('cerdos.ficha', id=a.cerdo_id) }}#alimentacion">{{ a.arete }}</a>
+          {% else %}🏠 Corral {{ a.corral }}{% endif %}
+        </td>
+        <td>{{ a.tipo_alimento }}
+          {% if a.observaciones %}<div class="small text-muted">{{ a.observaciones }}</div>{% endif %}</td>
+        <td class="text-end text-nowrap">{{ a.cantidad_kg|kg }}</td>
+        <td class="text-end text-nowrap">{{ a.costo|dinero }}</td>
+        <td class="text-end"><a href="{{ url_for('alimentacion.editar', id=a.id, volver=volver) }}" class="btn btn-sm btn-outline-secondary">Editar</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,17 @@
+# Archivos que NO se suben a GitHub
+
+# Clave secreta de las sesiones (se crea sola en cada computador)
+instance/
+
+# Fotos reales de los cerdos y copias de seguridad con los datos de la granja
+static/fotos/
+respaldos/
+
+# Archivos temporales de Python
+__pycache__/
+*.pyc
+
+# Configuración local del editor y de herramientas
+.claude/
+.vscode/
+.idea/

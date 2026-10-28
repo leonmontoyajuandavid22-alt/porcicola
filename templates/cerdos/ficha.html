@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% block titulo %}Cerdo {{ cerdo.arete }}{% endblock %}
+{% block contenido %}
+{% set c = cerdo %}
+<a href="{{ url_for('cerdos.lista') }}" class="small">← Volver a la lista</a>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 my-3">
+  <h1 class="h3 mb-0 titulo"><span class="icono-titulo"><i class="bi bi-piggy-bank-fill"></i></span>
+    {{ c.arete }}{% if c.nombre %} · {{ c.nombre }}{% endif %}
+    {% include "cerdos/_estado.html" %}
+  </h1>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('cerdos.editar', id=c.id) }}" class="btn btn-outline-secondary">Editar</a>
+    <form method="post" action="{{ url_for('cerdos.eliminar', id=c.id) }}"
+          onsubmit='return confirm({{ ("¿Eliminar el cerdo " ~ c.arete ~ " y todo su historial? Esto no se puede deshacer.")|tojson }})'>
+      <button class="btn btn-outline-danger">Eliminar</button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-4">
+    {% if c.foto %}
+      <img src="{{ url_for('static', filename='fotos/' ~ c.foto) }}" class="foto-grande shadow-sm" alt="Foto de {{ c.arete }}">
+    {% else %}
+      <img src="{{ url_for('static', filename='img/cerdo.svg') }}" class="foto-grande shadow-sm" alt="Sin foto">
+    {% endif %}
+  </div>
+
+  <div class="col-md-8">
+    <div class="card card-body shadow-sm">
+      <dl class="row dato mb-0">
+        <div class="col-6 col-lg-4"><dt>Sexo</dt><dd>{{ "♀ Hembra" if c.sexo == "hembra" else "♂ Macho" }}</dd></div>
+        <div class="col-6 col-lg-4"><dt>Raza</dt><dd>{{ c.raza or "—" }}</dd></div>
+        <div class="col-6 col-lg-4"><dt>Corral</dt><dd>
+          {% if c.corral_id %}<a href="{{ url_for('cerdos.lista', corral=c.corral_id) }}">{{ c.corral }}</a>{% else %}—{% endif %}
+        </dd></div>
+        <div class="col-6 col-lg-4"><dt>Nacimiento</dt><dd>{{ c.fecha_nacimiento|fecha }}</dd></div>
+        <div class="col-6 col-lg-4"><dt>Edad</dt><dd>{{ c.fecha_nacimiento|edad }}</dd></div>
+        <div class="col-6 col-lg-4"><dt>Registrado por</dt><dd>{{ c.registrado_por or "—" }}</dd></div>
+        <div class="col-6 col-lg-4"><dt>Madre</dt><dd>
+          {% if c.madre_id %}<a href="{{ url_for('cerdos.ficha', id=c.madre_id) }}">{{ c.madre_arete }}</a>{% else %}—{% endif %}
+        </dd></div>
+        <div class="col-6 col-lg-4"><dt>Padre</dt><dd>
+          {% if c.padre_id %}<a href="{{ url_for('cerdos.ficha', id=c.padre_id) }}">{{ c.padre_arete }}</a>{% else %}—{% endif %}
+        </dd></div>
+      </dl>
+      {% if c.observaciones %}
+        <hr>
+        <p class="mb-0" style="white-space: pre-line">{{ c.observaciones }}</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<h2 class="h5 mt-4"><i class="bi bi-diagram-3-fill text-secondary"></i> Crías ({{ hijos|length }})</h2>
+{% if hijos %}
+<div class="list-group shadow-sm">
+  {% for h in hijos %}
+    <a href="{{ url_for('cerdos.ficha', id=h.id) }}" class="list-group-item list-group-item-action d-flex justify-content-between">
+      <span>{{ h.arete }}{% if h.nombre %} · {{ h.nombre }}{% endif %} — {{ h.sexo }}</span>
+      <span class="text-muted small">{{ h.fecha_nacimiento|fecha }}</span>
+    </a>
+  {% endfor %}
+</div>
+{% else %}
+  <p class="text-muted">No tiene crías registradas.</p>
+{% endif %}
+
+{# ---------------- PESO ---------------- #}
+<h2 class="h5 mt-4" id="peso"><i class="bi bi-graph-up-arrow text-primary"></i> Peso</h2>
+<div class="row g-4">
+  <div class="col-lg-8">
+    {% if pesajes %}
+      {% set primero, ultimo = pesajes[0], pesajes[-1] %}
+      {% set dias = (ultimo.fecha - primero.fecha).days %}
+      <div class="row g-2 mb-3">
+        <div class="col-4"><div class="card card-body shadow-sm py-2 text-center">
+          <div class="small text-muted">Último peso</div>
+          <div class="fs-5 fw-semibold">{{ ultimo.peso_kg }} kg</div>
+        </div></div>
+        <div class="col-4"><div class="card card-body shadow-sm py-2 text-center">
+          <div class="small text-muted">Ganó en total</div>
+          <div class="fs-5 fw-semibold">{{ "%+.1f"|format(ultimo.peso_kg - primero.peso_kg) }} kg</div>
+        </div></div>
+        <div class="col-4"><div class="card card-body shadow-sm py-2 text-center">
+          <div class="small text-muted">Promedio diario</div>
+          <div class="fs-5 fw-semibold">{{ "%.2f"|format((ultimo.peso_kg - primero.peso_kg) / dias) ~ " kg" if dias else "—" }}</div>
+        </div></div>
+      </div>
+
+      {% if pesajes|length > 1 %}
+      <div class="card card-body shadow-sm mb-3">
+        <canvas id="grafica-peso" height="220"></canvas>
+      </div>
+      {% endif %}
+
+      <div class="table-responsive card shadow-sm">
+        <table class="table table-sm align-middle mb-0">
+          <thead><tr><th>Fecha</th><th class="text-end">Peso</th><th class="text-end">Cambio</th><th class="text-end">kg/día</th><th></th></tr></thead>
+          <tbody>
+          {% for p in pesajes|reverse %}
+            <tr>
+              <td class="text-nowrap">{{ p.fecha|fecha }}
+                {% if p.observaciones %}<div class="small text-muted">{{ p.observaciones }}</div>{% endif %}</td>
+              <td class="text-end text-nowrap fw-semibold">{{ p.peso_kg }} kg</td>
+              <td class="text-end text-nowrap {{ 'text-danger' if p.diferencia is not none and p.diferencia < 0 }}">
+                {{ "%+.1f kg"|format(p.diferencia) if p.diferencia is not none else "—" }}</td>
+              <td class="text-end text-nowrap">{{ "%.2f"|format(p.ganancia_diaria) if p.ganancia_diaria is not none else "—" }}</td>
+              <td class="text-end"><a href="{{ url_for('pesajes.editar', id=p.id, volver='ficha') }}" class="btn btn-sm btn-outline-secondary">Editar</a></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted">Todavía no tiene pesajes.</p>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-4">
+    {% if c.estado == "activo" %}
+    <form method="post" action="{{ url_for('pesajes.nuevo') }}" class="card card-body shadow-sm">
+      <h3 class="h6">Registrar pesaje</h3>
+      <input type="hidden" name="cerdo_id" value="{{ c.id }}">
+      <input type="hidden" name="volver" value="ficha">
+      <label class="form-label small">Fecha</label>
+      <input name="fecha" type="date" class="form-control mb-2" required value="{{ hoy.isoformat() }}" max="{{ hoy.isoformat() }}">
+      <label class="form-label small">Peso (kg)</label>
+      <input name="peso_kg" type="number" step="0.01" min="0.01" max="499" class="form-control mb-2" required inputmode="decimal">
+      <label class="form-label small">Observaciones</label>
+      <input name="observaciones" class="form-control mb-3" maxlength="255">
+      <button class="btn btn-primario">Guardar</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{# ---------------- SALUD ---------------- #}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-2" id="salud">
+  <h2 class="h5 mb-0"><i class="bi bi-heart-pulse-fill text-danger"></i> Salud</h2>
+  {% if c.estado == "activo" %}
+  <a href="{{ url_for('salud.nuevo', cerdo=c.id, volver='ficha') }}" class="btn btn-sm btn-primario">+ Registrar</a>
+  {% endif %}
+</div>
+
+{% if pendientes %}
+  <p class="small text-muted mb-1">Próximas dosis</p>
+  <div class="mb-3">{% with volver="ficha" %}{% include "salud/_pendientes.html" %}{% endwith %}</div>
+{% endif %}
+
+{% if salud %}
+<div class="table-responsive card shadow-sm">
+  <table class="table table-sm align-middle mb-0">
+    <thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>Medicamento</th><th>Responsable</th><th class="text-end">Costo</th><th></th></tr></thead>
+    <tbody>
+    {% for s in salud %}
+      <tr>
+        <td class="text-nowrap">{{ s.fecha|fecha }}</td>
+        <td>{% include "salud/_tipo.html" %}</td>
+        <td>{{ s.descripcion }}
+          {% if s.observaciones %}<div class="small text-muted">{{ s.observaciones }}</div>{% endif %}</td>
+        <td>{{ s.medicamento or "—" }}{% if s.dosis %} <span class="small text-muted">({{ s.dosis }})</span>{% endif %}</td>
+        <td>{{ s.responsable or "—" }}</td>
+        <td class="text-end text-nowrap">{{ s.costo|dinero }}</td>
+        <td class="text-end"><a href="{{ url_for('salud.editar', id=s.id, volver='ficha') }}" class="btn btn-sm btn-outline-secondary">Editar</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  <p class="text-muted">No tiene registros de salud.</p>
+{% endif %}
+
+{# ---------------- REPRODUCCIÓN ---------------- #}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 mb-2" id="reproduccion">
+  <h2 class="h5 mb-0"><i class="bi bi-balloon-heart-fill" style="color:#a855c7"></i> Reproducción</h2>
+  {% if c.estado == "activo" and c.sexo == "hembra" %}
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('reproduccion.nueva_monta', cerda=c.id, volver='ficha') }}" class="btn btn-sm btn-primario">+ Monta</a>
+    <a href="{{ url_for('reproduccion.nuevo_parto', cerda=c.id, volver='ficha') }}" class="btn btn-sm btn-outline-secondary">+ Parto</a>
+  </div>
+  {% endif %}
+</div>
+
+{% if c.sexo == "hembra" %}
+  {% set r = repro.resumen %}
+  {% if r.partos %}
+  <div class="row g-2 mb-3">
+    {% for titulo, valor in [("Partos", r.partos), ("Nacidos vivos", r.vivos), ("Promedio por parto", "%.1f"|format(r.promedio)),
+                             ("Nacidos muertos", r.muertos), ("Destetados", r.destetados)] %}
+    <div class="col-4 col-md"><div class="card card-body shadow-sm py-2 text-center">
+      <div class="small text-muted">{{ titulo }}</div>
+      <div class="fs-5 fw-semibold">{{ valor }}</div>
+    </div></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% set abiertas = repro.montas|selectattr("estado", "in", ["pendiente", "confirmada"])|list %}
+  {% if abiertas and c.estado == "activo" %}
+    <ul class="list-group shadow-sm mb-3">
+      {% with volver="ficha" %}{% for m in abiertas %}{% include "reproduccion/_proximo_parto.html" %}{% endfor %}{% endwith %}
+    </ul>
+  {% endif %}
+{% endif %}
+
+{% with volver="ficha", mostrar_cerda=(c.sexo == "macho"), montas=repro.montas, partos=repro.partos %}
+  {% if montas %}
+    <p class="small text-muted mb-1">{{ "Montas en las que fue el verraco" if c.sexo == "macho" else "Montas e inseminaciones" }}</p>
+    {% include "reproduccion/_tabla_montas.html" %}
+  {% endif %}
+  {% if partos %}
+    <p class="small text-muted mb-1 mt-3">Partos</p>
+    {% include "reproduccion/_tabla_partos.html" %}
+  {% endif %}
+  {% if not montas and not partos %}<p class="text-muted">No tiene registros de reproducción.</p>{% endif %}
+{% endwith %}
+
+{# ---------------- ALIMENTACIÓN ---------------- #}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-2" id="alimentacion">
+  <h2 class="h5 mb-0"><i class="bi bi-basket2-fill text-warning"></i> Alimentación</h2>
+  {% if c.estado == "activo" %}
+  <a href="{{ url_for('alimentacion.lista', para='cerdo-' ~ c.id) }}" class="btn btn-sm btn-primario">+ Registrar</a>
+  {% endif %}
+</div>
+{% if comida %}
+  <p class="small text-muted mb-1">
+    Lo que se le dio a este cerdo{% if c.corral %} y a su corral actual ({{ c.corral }}){% endif %}. Últimos 30 registros.
+  </p>
+  {% with registros=comida, volver="ficha" %}{% include "alimentacion/_tabla.html" %}{% endwith %}
+{% else %}
+  <p class="text-muted">No hay registros de alimentación para este cerdo ni para su corral.</p>
+{% endif %}
+
+{# ---------------- SALIDA ---------------- #}
+<h2 class="h5 mt-4 mb-2" id="salida"><i class="bi bi-truck text-success"></i> Salida</h2>
+{% if salida %}
+  <div class="card card-body shadow-sm" style="max-width: 640px">
+    <div class="d-flex justify-content-between align-items-start gap-2">
+      <div>
+        <div class="fw-semibold">{{ "Vendido" if salida.tipo == "venta" else "Murió" }} el {{ salida.fecha|fecha }}</div>
+        <dl class="row dato mb-0 mt-2">
+          {% if salida.peso_kg %}<div class="col-6"><dt>Peso</dt><dd>{{ salida.peso_kg|kg }}</dd></div>{% endif %}
+          {% if salida.tipo == "venta" %}
+            <div class="col-6"><dt>Precio</dt><dd>{{ salida.precio|dinero }}
+              {% if salida.peso_kg %}<span class="small text-muted">({{ (salida.precio / salida.peso_kg)|dinero }}/kg)</span>{% endif %}</dd></div>
+            <div class="col-6"><dt>Comprador</dt><dd>{{ salida.comprador or "—" }}</dd></div>
+          {% else %}
+            <div class="col-12"><dt>Causa</dt><dd>{{ salida.causa }}</dd></div>
+          {% endif %}
+        </dl>
+        {% if salida.observaciones %}<p class="small text-muted mb-0">{{ salida.observaciones }}</p>{% endif %}
+      </div>
+      <a href="{{ url_for('salidas.editar', id=salida.id, volver='ficha') }}" class="btn btn-sm btn-outline-secondary">Editar</a>
+    </div>
+  </div>
+{% else %}
+  <div class="d-flex flex-wrap gap-2">
+    <a href="{{ url_for('salidas.nueva', cerdo=c.id, tipo='venta', volver='ficha') }}" class="btn btn-sm btn-outline-primary">Registrar venta</a>
+    <a href="{{ url_for('salidas.nueva', cerdo=c.id, tipo='muerte', volver='ficha') }}" class="btn btn-sm btn-outline-secondary">Registrar muerte</a>
+  </div>
+  {% if c.estado != "activo" %}
+    <p class="small text-muted mt-2">Este cerdo está como "{{ c.estado }}" pero no tiene la salida registrada. Regístrala para tener los datos completos.</p>
+  {% endif %}
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if pesajes|length > 1 %}
+{# Chart.js dibuja la gráfica. Le pasamos las fechas y los pesos desde Python con "tojson". #}
+<script src="{{ url_for('static', filename='vendor/chart.umd.min.js') }}"></script>
+<script>
+  new Chart(document.getElementById("grafica-peso"), {
+    type: "line",
+    data: {
+      labels: {{ pesajes|map(attribute="fecha")|map("fecha")|list|tojson }},
+      datasets: [{
+        label: "Peso (kg)",
+        data: {{ pesajes|map(attribute="peso_kg")|map("float")|list|tojson }},
+        borderColor: "#c2477a",
+        backgroundColor: "rgba(194, 71, 122, 0.12)",
+        fill: true,
+        tension: 0.25,
+        pointRadius: 4
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { title: { display: true, text: "kg" } } }
+    }
+  });
+</script>
+{% endif %}
+{% endblock %}

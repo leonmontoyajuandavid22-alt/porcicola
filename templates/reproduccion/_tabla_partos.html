@@ -1,0 +1,33 @@
+{# Tabla de partos. Espera "partos", "volver" y "mostrar_cerda" (True/False). #}
+<div class="table-responsive card shadow-sm">
+  <table class="table table-sm table-hover align-middle mb-0">
+    <thead>
+      <tr>
+        <th>Parto</th>
+        {% if mostrar_cerda %}<th>Cerda</th>{% endif %}
+        <th class="text-center">Vivos</th><th class="text-center">Muertos</th>
+        <th>Destete</th><th class="text-center">Destetados</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in partos %}
+      <tr>
+        <td class="text-nowrap">{{ p.fecha|fecha }}
+          {% if p.observaciones %}<div class="small text-muted">{{ p.observaciones }}</div>{% endif %}</td>
+        {% if mostrar_cerda %}
+          <td class="text-nowrap"><a href="{{ url_for('cerdos.ficha', id=p.cerda_id) }}#reproduccion">{{ p.cerda_arete }}</a></td>
+        {% endif %}
+        <td class="text-center fw-semibold">{{ p.lechones_vivos }}</td>
+        <td class="text-center">{{ p.lechones_muertos }}</td>
+        <td class="text-nowrap">
+          {% if p.fecha_destete %}{{ p.fecha_destete|fecha }}
+          {% elif p.lechones_vivos %}<a href="{{ url_for('reproduccion.destete', id=p.id, volver=volver) }}" class="btn btn-sm btn-outline-primary">Registrar destete</a>
+          {% else %}—{% endif %}
+        </td>
+        <td class="text-center">{{ p.lechones_destetados if p.lechones_destetados is not none else "—" }}</td>
+        <td class="text-end"><a href="{{ url_for('reproduccion.editar_parto', id=p.id, volver=volver) }}" class="btn btn-sm btn-outline-secondary">Editar</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>

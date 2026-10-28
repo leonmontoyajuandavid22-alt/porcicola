@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titulo %}Reproducción{% endblock %}
+{% block contenido %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0 titulo"><span class="icono-titulo"><i class="bi bi-balloon-heart-fill"></i></span>Reproducción</h1>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('reproduccion.nueva_monta') }}" class="btn btn-primario">+ Monta / inseminación</a>
+    <a href="{{ url_for('reproduccion.nuevo_parto') }}" class="btn btn-outline-secondary">+ Parto</a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <h2 class="h5">Próximos partos ({{ proximos|length }})</h2>
+    {% if proximos %}
+      <ul class="list-group shadow-sm">
+        {% with volver="" %}{% for m in proximos %}{% include "reproduccion/_proximo_parto.html" %}{% endfor %}{% endwith %}
+      </ul>
+    {% else %}
+      <p class="text-muted">No hay cerdas esperando parto.</p>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-5">
+    <h2 class="h5">Destetes pendientes ({{ destetes|length }})</h2>
+    {% if destetes %}
+      <ul class="list-group shadow-sm">
+        {% for p in destetes %}
+          {% set dias = (hoy - p.fecha).days %}
+          <li class="list-group-item d-flex align-items-center gap-2">
+            <div class="flex-grow-1">
+              <a href="{{ url_for('cerdos.ficha', id=p.cerda_id) }}#reproduccion" class="fw-semibold">{{ p.cerda_arete }}</a>
+              · {{ p.lechones_vivos }} lechones
+              <div class="small {{ 'text-danger fw-semibold' if dias >= dias_destete else 'text-muted' }}">
+                Parió el {{ p.fecha|fecha }} · hace {{ dias }} día(s)
+              </div>
+            </div>
+            <a href="{{ url_for('reproduccion.destete', id=p.id) }}" class="btn btn-sm btn-primario">Destetar</a>
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="small text-muted mt-1">En rojo: ya pasaron {{ dias_destete }} días o más desde el parto.</p>
+    {% else %}
+      <p class="text-muted">No hay camadas sin destetar.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% with volver="", mostrar_cerda=True %}
+<h2 class="h5 mt-4">Montas e inseminaciones</h2>
+{% if montas %}{% include "reproduccion/_tabla_montas.html" %}{% else %}<p class="text-muted">No hay montas registradas.</p>{% endif %}
+
+<h2 class="h5 mt-4">Partos</h2>
+{% if partos %}{% include "reproduccion/_tabla_partos.html" %}{% else %}<p class="text-muted">No hay partos registrados.</p>{% endif %}
+{% endwith %}
+{% if montas|length == 100 or partos|length == 100 %}<p class="small text-muted mt-2">Se muestran los 100 más recientes.</p>{% endif %}
+{% endblock %}

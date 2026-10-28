@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block titulo %}{{ "Editar" if editando else "Nueva" }} monta{% endblock %}
+{% block contenido %}
+{% set m = monta %}
+<h1 class="h3 mb-3 titulo"><span class="icono-titulo"><i class="bi bi-balloon-heart-fill"></i></span>{{ "Editar" if editando else "Nueva" }} monta o inseminación</h1>
+
+<form method="post" class="card card-body shadow-sm" style="max-width: 640px">
+  <input type="hidden" name="volver" value="{{ m.volver or '' }}">
+  <div class="row g-3">
+    <div class="col-sm-6">
+      <label class="form-label">Cerda *</label>
+      <select name="cerda_id" class="form-select" required>
+        <option value="">Elige...</option>
+        {% for c in cerdas %}
+          <option value="{{ c.id }}" {{ "selected" if m.cerda_id|string == c.id|string }}>{{ c.arete }}{% if c.nombre %} · {{ c.nombre }}{% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-sm-6">
+      <label class="form-label">Tipo *</label>
+      <select name="tipo" class="form-select" required>
+        <option value="monta" {{ "selected" if m.tipo == "monta" }}>Monta natural</option>
+        <option value="inseminacion" {{ "selected" if m.tipo == "inseminacion" }}>Inseminación</option>
+      </select>
+    </div>
+    <div class="col-sm-6">
+      <label class="form-label">Verraco</label>
+      <select name="verraco_id" class="form-select">
+        <option value="">Sin especificar / semen comprado</option>
+        {% for v in verracos %}
+          <option value="{{ v.id }}" {{ "selected" if m.verraco_id|string == v.id|string }}>{{ v.arete }}{% if v.nombre %} · {{ v.nombre }}{% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-sm-6">
+      <label class="form-label">Fecha *</label>
+      <input name="fecha" id="fecha" type="date" class="form-control" required max="{{ hoy }}" value="{{ m.fecha or '' }}">
+      <div class="form-text">Parto probable: <strong id="parto-probable">—</strong> ({{ dias_gestacion }} días después)</div>
+    </div>
+    <div class="col-12">
+      <label class="form-label">Observaciones</label>
+      <textarea name="observaciones" class="form-control" rows="2"
+                placeholder="Ej. proveedor del semen, se repitió al día siguiente...">{{ m.observaciones or '' }}</textarea>
+    </div>
+  </div>
+  <div class="d-flex gap-2 mt-4">
+    <button class="btn btn-primario">Guardar</button>
+    <a href="{{ url_for('cerdos.ficha', id=m.cerda_id) ~ '#reproduccion' if m.volver == 'ficha' and m.cerda_id else url_for('reproduccion.inicio') }}"
+       class="btn btn-outline-secondary">Cancelar</a>
+  </div>
+</form>
+
+{% if editando %}
+<div class="d-flex flex-wrap gap-2 mt-3">
+  {% if m.estado == "fallida" %}
+  <form method="post" action="{{ url_for('reproduccion.cambiar_estado', id=m.id) }}">
+    <input type="hidden" name="estado" value="pendiente"><input type="hidden" name="volver" value="{{ m.volver or '' }}">
+    <button class="btn btn-sm btn-outline-secondary">Reabrir (no fue fallida)</button>
+  </form>
+  {% endif %}
+  <form method="post" action="{{ url_for('reproduccion.eliminar_monta', id=m.id) }}"
+        onsubmit="return confirm('¿Eliminar esta monta?')">
+    <input type="hidden" name="volver" value="{{ m.volver or '' }}">
+    <button class="btn btn-sm btn-outline-danger">Eliminar monta</button>
+  </form>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Muestra la fecha probable de parto apenas se elige la fecha de la monta.
+  const campoFecha = document.getElementById("fecha");
+  function calcularParto() {
+    if (!campoFecha.value) return;
+    const parto = new Date(campoFecha.value + "T12:00:00");
+    parto.setDate(parto.getDate() + {{ dias_gestacion }});
+    document.getElementById("parto-probable").textContent = parto.toLocaleDateString("es-CO");
+  }
+  campoFecha.addEventListener("change", calcularParto);
+  calcularParto();
+</script>
+{% endblock %}

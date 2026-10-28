@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Registrar destete{% endblock %}
+{% block contenido %}
+{% set p = parto %}
+<h1 class="h3 mb-1 titulo"><span class="icono-titulo"><i class="bi bi-balloon-heart-fill"></i></span>Registrar destete</h1>
+<p class="text-muted">Cerda {{ p.cerda_arete }} · parió el {{ p.fecha|fecha }} · {{ p.lechones_vivos }} lechones vivos</p>
+
+<form method="post" class="card card-body shadow-sm" style="max-width: 420px">
+  <input type="hidden" name="volver" value="{{ p.volver or '' }}">
+  <label class="form-label">Fecha del destete *</label>
+  <input name="fecha_destete" type="date" class="form-control mb-3" required max="{{ hoy }}" value="{{ p.fecha_destete or '' }}">
+  <label class="form-label">Lechones destetados *</label>
+  <input name="lechones_destetados" type="number" min="0" max="{{ p.lechones_vivos }}" class="form-control mb-3" required
+         value="{{ p.lechones_destetados if p.lechones_destetados is not none else '' }}">
+  <div class="d-flex gap-2">
+    <button class="btn btn-primario">Guardar</button>
+    <a href="{{ url_for('cerdos.ficha', id=p.cerda_id) ~ '#reproduccion' if p.volver == 'ficha' else url_for('reproduccion.inicio') }}"
+       class="btn btn-outline-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

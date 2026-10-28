@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Logo de Porcícola: cara de cerdito -->
+  <!-- orejas -->
+  <path d="M18 30 L22 6 L42 22 Z" fill="#e8799f" stroke="#c2477a" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M82 30 L78 6 L58 22 Z" fill="#e8799f" stroke="#c2477a" stroke-width="3" stroke-linejoin="round"/>
+  <!-- cabeza -->
+  <circle cx="50" cy="55" r="38" fill="#f6a5c0" stroke="#c2477a" stroke-width="3"/>
+  <!-- mejillas -->
+  <circle cx="26" cy="64" r="7" fill="#f28bb0" opacity="0.7"/>
+  <circle cx="74" cy="64" r="7" fill="#f28bb0" opacity="0.7"/>
+  <!-- ojos -->
+  <circle cx="36" cy="46" r="5" fill="#3b2330"/>
+  <circle cx="64" cy="46" r="5" fill="#3b2330"/>
+  <circle cx="37.5" cy="44.5" r="1.6" fill="#fff"/>
+  <circle cx="65.5" cy="44.5" r="1.6" fill="#fff"/>
+  <!-- trompa -->
+  <ellipse cx="50" cy="66" rx="17" ry="12" fill="#e8799f" stroke="#c2477a" stroke-width="3"/>
+  <ellipse cx="44" cy="66" rx="3" ry="4.5" fill="#9c3260"/>
+  <ellipse cx="56" cy="66" rx="3" ry="4.5" fill="#9c3260"/>
+</svg>

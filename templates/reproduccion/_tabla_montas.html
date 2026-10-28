@@ -1,0 +1,27 @@
+{# Tabla de montas. Espera "montas", "estados", "volver" y "mostrar_cerda" (True/False). #}
+<div class="table-responsive card shadow-sm">
+  <table class="table table-sm table-hover align-middle mb-0">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        {% if mostrar_cerda %}<th>Cerda</th>{% endif %}
+        <th>Tipo</th><th>Verraco</th><th>Parto probable</th><th>Estado</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for m in montas %}
+      <tr>
+        <td class="text-nowrap">{{ m.fecha|fecha }}</td>
+        {% if mostrar_cerda %}
+          <td class="text-nowrap"><a href="{{ url_for('cerdos.ficha', id=m.cerda_id) }}#reproduccion">{{ m.cerda_arete }}</a></td>
+        {% endif %}
+        <td>{{ "Inseminación" if m.tipo == "inseminacion" else "Monta" }}</td>
+        <td>{% if m.verraco_id %}<a href="{{ url_for('cerdos.ficha', id=m.verraco_id) }}">{{ m.verraco_arete }}</a>{% else %}—{% endif %}</td>
+        <td class="text-nowrap">{{ m.fecha_probable_parto|fecha }}</td>
+        <td>{% include "reproduccion/_estado_monta.html" %}</td>
+        <td class="text-end"><a href="{{ url_for('reproduccion.editar_monta', id=m.id, volver=volver) }}" class="btn btn-sm btn-outline-secondary">Editar</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>

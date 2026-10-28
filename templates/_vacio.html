@@ -1,0 +1,5 @@
+{# Mensaje con dibujito para cuando una lista está vacía. Espera la variable "mensaje". #}
+<div class="vacio card shadow-sm">
+  <div><img src="{{ url_for('static', filename='img/cerdo.svg') }}" alt=""></div>
+  <div class="fw-semibold">{{ mensaje }}</div>
+</div>

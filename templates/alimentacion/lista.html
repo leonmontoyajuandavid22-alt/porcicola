@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block titulo %}Alimentación{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3 titulo"><span class="icono-titulo"><i class="bi bi-basket2-fill"></i></span>Alimentación</h1>
+
+<div class="row g-4">
+  <div class="col-lg-4 order-lg-2">
+    <form method="post" action="{{ url_for('alimentacion.nuevo') }}" class="card card-body shadow-sm">
+      <h2 class="h5">Registrar alimentación</h2>
+      <input type="hidden" name="volver" value="{{ registro.volver }}">
+      {% include "alimentacion/_campos.html" %}
+      <button class="btn btn-primario">Guardar</button>
+    </form>
+  </div>
+
+  <div class="col-lg-8 order-lg-1">
+    {# Filtros: por defecto, el mes actual #}
+    <form method="get" class="row g-2 mb-3">
+      <div class="col-6 col-md-3">
+        <label class="form-label small mb-0">Desde</label>
+        <input name="desde" type="date" class="form-control" value="{{ filtros.desde }}">
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label small mb-0">Hasta</label>
+        <input name="hasta" type="date" class="form-control" value="{{ filtros.hasta }}">
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label small mb-0">Corral</label>
+        <select name="corral" class="form-select">
+          <option value="">Todos</option>
+          {% for co in corrales %}
+            <option value="{{ co.id }}" {{ "selected" if filtros.corral == co.id|string }}>{{ co.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label small mb-0">Alimento</label>
+        <select name="alimento" class="form-select">
+          <option value="">Todos</option>
+          {% for a in alimentos %}
+            <option {{ "selected" if filtros.alimento == a.tipo_alimento }}>{{ a.tipo_alimento }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primario">Filtrar</button>
+        <a href="{{ url_for('alimentacion.lista') }}" class="btn btn-outline-secondary">Este mes</a>
+      </div>
+    </form>
+
+    {% if registros %}
+      {# Resumen del periodo filtrado #}
+      <div class="card card-body shadow-sm mb-3">
+        <div class="d-flex flex-wrap gap-4 mb-2">
+          <div><div class="small text-muted">Total consumido</div><div class="fs-5 fw-semibold">{{ total.kg|kg }}</div></div>
+          <div><div class="small text-muted">Total gastado</div><div class="fs-5 fw-semibold">{{ total.costo|dinero }}</div></div>
+        </div>
+        {% if resumen|length > 1 %}
+        <table class="table table-sm mb-0">
+          <thead><tr><th>Alimento</th><th class="text-end">Cantidad</th><th class="text-end">Costo</th></tr></thead>
+          <tbody>
+          {% for alimento, fila in resumen %}
+            <tr><td>{{ alimento }}</td><td class="text-end">{{ fila.kg|kg }}</td><td class="text-end">{{ fila.costo|dinero }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+      </div>
+
+      {% with volver="" %}{% include "alimentacion/_tabla.html" %}{% endwith %}
+    {% else %}
+      {% set mensaje %}No hay registros de alimentación entre {{ filtros.desde|fecha }} y {{ filtros.hasta|fecha }}.{% endset %}{% include "_vacio.html" %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

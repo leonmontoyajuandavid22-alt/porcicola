@@ -1,0 +1,31 @@
+{# Una monta abierta con sus botones. Espera "m", "hoy", "estados" y "volver". #}
+{% set dias = (m.fecha_probable_parto - hoy).days %}
+<li class="list-group-item d-flex flex-wrap align-items-center gap-2">
+  <div class="flex-grow-1">
+    <div>
+      {% if volver != "ficha" %}
+        <a href="{{ url_for('cerdos.ficha', id=m.cerda_id) }}#reproduccion" class="fw-semibold">{{ m.cerda_arete }}</a>{% if m.cerda_nombre %} · {{ m.cerda_nombre }}{% endif %}
+      {% endif %}
+      {% include "reproduccion/_estado_monta.html" %}
+    </div>
+    <div class="small {{ 'text-danger fw-semibold' if dias < 0 else 'text-muted' }}">
+      Parto probable {{ m.fecha_probable_parto|fecha }} ·
+      {% if dias < 0 %}pasó hace {{ -dias }} día(s){% elif dias == 0 %}¡es hoy!{% else %}faltan {{ dias }} día(s){% endif %}
+      · {{ "inseminada" if m.tipo == "inseminacion" else "montada" }} el {{ m.fecha|fecha }}{% if m.verraco_arete %} con {{ m.verraco_arete }}{% endif %}
+    </div>
+  </div>
+  <div class="d-flex flex-wrap gap-1">
+    <a href="{{ url_for('reproduccion.nuevo_parto', monta=m.id, volver=volver) }}" class="btn btn-sm btn-primario">Registrar parto</a>
+    {% if m.estado == "pendiente" %}
+    <form method="post" action="{{ url_for('reproduccion.cambiar_estado', id=m.id) }}">
+      <input type="hidden" name="estado" value="confirmada"><input type="hidden" name="volver" value="{{ volver }}">
+      <button class="btn btn-sm btn-outline-success">Confirmar preñez</button>
+    </form>
+    {% endif %}
+    <form method="post" action="{{ url_for('reproduccion.cambiar_estado', id=m.id) }}"
+          onsubmit="return confirm('¿Marcar esta monta como fallida (la cerda no quedó preñada)?')">
+      <input type="hidden" name="estado" value="fallida"><input type="hidden" name="volver" value="{{ volver }}">
+      <button class="btn btn-sm btn-outline-danger">Fallida</button>
+    </form>
+  </div>
+</li>

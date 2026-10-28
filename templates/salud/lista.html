@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block titulo %}Salud{% endblock %}
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0 titulo"><span class="icono-titulo"><i class="bi bi-heart-pulse-fill"></i></span>Salud</h1>
+  <a href="{{ url_for('salud.nuevo') }}" class="btn btn-primario">+ Nuevo registro</a>
+</div>
+
+<h2 class="h5">Próximas dosis ({{ pendientes|length }})</h2>
+{% if pendientes %}
+  {% with volver="" %}{% include "salud/_pendientes.html" %}{% endwith %}
+{% else %}
+  <p class="text-muted">No hay dosis pendientes. Cuando registres una vacuna con "próxima dosis", aparecerá aquí.</p>
+{% endif %}
+
+<h2 class="h5 mt-4">Historial</h2>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-12 col-md-4">
+    <input name="buscar" class="form-control" placeholder="Arete, nombre, vacuna, medicamento..." value="{{ filtros.buscar }}">
+  </div>
+  <div class="col-6 col-md-3">
+    <select name="tipo" class="form-select">
+      <option value="">Todos los tipos</option>
+      {% for valor, texto in tipos.items() %}
+        <option value="{{ valor }}" {{ "selected" if filtros.tipo == valor }}>{{ texto }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-6 col-md-3">
+    <select name="corral" class="form-select">
+      <option value="">Todos los corrales</option>
+      {% for co in corrales %}
+        <option value="{{ co.id }}" {{ "selected" if filtros.corral == co.id|string }}>{{ co.nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-12 col-md-2 d-flex gap-2">
+    <button class="btn btn-primario flex-grow-1">Filtrar</button>
+    <a href="{{ url_for('salud.lista') }}" class="btn btn-outline-secondary" title="Quitar filtros">✕</a>
+  </div>
+</form>
+
+{% if registros %}
+<div class="table-responsive card shadow-sm">
+  <table class="table table-hover align-middle mb-0">
+    <thead><tr><th>Fecha</th><th>Cerdo</th><th>Tipo</th><th>Descripción</th><th>Medicamento</th><th>Responsable</th><th class="text-end">Costo</th><th></th></tr></thead>
+    <tbody>
+    {% for s in registros %}
+      <tr>
+        <td class="text-nowrap">{{ s.fecha|fecha }}</td>
+        <td class="text-nowrap"><a href="{{ url_for('cerdos.ficha', id=s.cerdo_id) }}#salud">{{ s.arete }}</a></td>
+        <td>{% include "salud/_tipo.html" %}</td>
+        <td>{{ s.descripcion }}</td>
+        <td>{{ s.medicamento or "—" }}{% if s.dosis %} <span class="small text-muted">({{ s.dosis }})</span>{% endif %}</td>
+        <td>{{ s.responsable or "—" }}</td>
+        <td class="text-end text-nowrap">{{ s.costo|dinero }}</td>
+        <td class="text-end"><a href="{{ url_for('salud.editar', id=s.id) }}" class="btn btn-sm btn-outline-secondary">Editar</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if registros|length == 200 %}<p class="small text-muted mt-2">Se muestran los 200 registros más recientes.</p>{% endif %}
+{% else %}
+  {% set mensaje %}No hay registros de salud{% if filtros.buscar or filtros.corral or filtros.tipo %} con esos filtros{% endif %}.{% endset %}{% include "_vacio.html" %}
+{% endif %}
+{% endblock %}

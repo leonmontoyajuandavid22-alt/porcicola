@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Editar pesaje{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3 titulo"><span class="icono-titulo"><i class="bi bi-graph-up-arrow"></i></span>Editar pesaje de {{ pesaje.arete }}{% if pesaje.nombre %} · {{ pesaje.nombre }}{% endif %}</h1>
+<form method="post" class="card card-body shadow-sm" style="max-width: 420px">
+  <input type="hidden" name="volver" value="{{ volver }}">
+  <label class="form-label">Fecha *</label>
+  <input name="fecha" type="date" class="form-control mb-3" required value="{{ pesaje.fecha }}">
+  <label class="form-label">Peso (kg) *</label>
+  <input name="peso_kg" type="number" step="0.01" min="0.01" max="499" class="form-control mb-3" required value="{{ pesaje.peso_kg }}">
+  <label class="form-label">Observaciones</label>
+  <input name="observaciones" class="form-control mb-3" maxlength="255" value="{{ pesaje.observaciones or '' }}">
+  <div class="d-flex gap-2">
+    <button class="btn btn-primario">Guardar</button>
+    <a href="{{ url_for('cerdos.ficha', id=pesaje.cerdo_id) ~ '#peso' if volver == 'ficha' else url_for('pesajes.lista') }}"
+       class="btn btn-outline-secondary">Cancelar</a>
+  </div>
+</form>
+
+<form method="post" action="{{ url_for('pesajes.eliminar', id=pesaje.id) }}" class="mt-3"
+      onsubmit="return confirm('¿Eliminar este pesaje?')">
+  <input type="hidden" name="volver" value="{{ volver }}">
+  <button class="btn btn-sm btn-outline-danger">Eliminar pesaje</button>
+</form>
+{% endblock %}

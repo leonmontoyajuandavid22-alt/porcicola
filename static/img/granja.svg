@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice">
+  <!-- Paisaje de granja: cielo, sol, montañas, granero, cerca y cerditos -->
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9fd8f5"/>
+      <stop offset="1" stop-color="#e3f4fb"/>
+    </linearGradient>
+    <linearGradient id="loma1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9ccc65"/>
+      <stop offset="1" stop-color="#7cb342"/>
+    </linearGradient>
+    <linearGradient id="loma2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7cb342"/>
+      <stop offset="1" stop-color="#558b2f"/>
+    </linearGradient>
+    <!-- un cerdito pequeño para usar varias veces -->
+    <g id="cerdito">
+      <path d="M-34 -6 q-12 -4 -9 -12 q3 -6 9 -2" fill="none" stroke="#c2477a" stroke-width="3" stroke-linecap="round"/>
+      <rect x="-26" y="10" width="10" height="20" rx="4" fill="#e8799f"/>
+      <rect x="14" y="10" width="10" height="20" rx="4" fill="#e8799f"/>
+      <ellipse cx="0" cy="0" rx="36" ry="24" fill="#f6a5c0" stroke="#c2477a" stroke-width="2.5"/>
+      <rect x="-18" y="12" width="10" height="20" rx="4" fill="#f6a5c0" stroke="#c2477a" stroke-width="2.5"/>
+      <rect x="22" y="12" width="10" height="20" rx="4" fill="#f6a5c0" stroke="#c2477a" stroke-width="2.5"/>
+      <circle cx="34" cy="-8" r="18" fill="#f6a5c0" stroke="#c2477a" stroke-width="2.5"/>
+      <path d="M34 -24 L42 -38 L48 -20 Z" fill="#e8799f" stroke="#c2477a" stroke-width="2.5" stroke-linejoin="round"/>
+      <circle cx="38" cy="-12" r="2.5" fill="#3b2330"/>
+      <ellipse cx="51" cy="-4" rx="6" ry="7" fill="#e8799f" stroke="#c2477a" stroke-width="2.5"/>
+      <circle cx="50" cy="-6" r="1.2" fill="#9c3260"/>
+      <circle cx="52" cy="-2" r="1.2" fill="#9c3260"/>
+    </g>
+  </defs>
+
+  <rect width="1200" height="400" fill="url(#cielo)"/>
+
+  <!-- sol -->
+  <circle cx="1040" cy="80" r="70" fill="#ffe082" opacity="0.45"/>
+  <circle cx="1040" cy="80" r="46" fill="#ffd54f"/>
+
+  <!-- nubes -->
+  <g fill="#fff" opacity="0.95">
+    <ellipse cx="200" cy="80" rx="60" ry="22"/><ellipse cx="240" cy="66" rx="40" ry="24"/><ellipse cx="170" cy="70" rx="30" ry="18"/>
+    <ellipse cx="640" cy="60" rx="50" ry="18"/><ellipse cx="672" cy="48" rx="32" ry="20"/>
+    <ellipse cx="880" cy="130" rx="44" ry="15"/><ellipse cx="905" cy="120" rx="26" ry="16"/>
+  </g>
+
+  <!-- montañas lejanas -->
+  <path d="M0 250 L140 150 L260 230 L400 130 L560 240 L700 160 L860 250 L1000 170 L1200 250 L1200 400 L0 400 Z" fill="#b5d99c" opacity="0.7"/>
+
+  <!-- lomas -->
+  <path d="M0 280 Q300 200 620 270 T1200 250 L1200 400 L0 400 Z" fill="url(#loma1)"/>
+
+  <!-- árboles -->
+  <g>
+    <rect x="96" y="210" width="12" height="50" fill="#795548"/>
+    <circle cx="102" cy="200" r="34" fill="#558b2f"/><circle cx="84" cy="214" r="22" fill="#689f38"/><circle cx="122" cy="214" r="22" fill="#689f38"/>
+    <rect x="1104" y="196" width="12" height="54" fill="#795548"/>
+    <circle cx="1110" cy="186" r="36" fill="#558b2f"/><circle cx="1090" cy="202" r="22" fill="#689f38"/><circle cx="1132" cy="202" r="22" fill="#689f38"/>
+  </g>
+
+  <!-- granero -->
+  <g transform="translate(760 140)">
+    <rect x="0" y="60" width="200" height="120" fill="#c62828"/>
+    <path d="M-14 64 L100 0 L214 64 Z" fill="#8e1c1c"/>
+    <path d="M-14 64 L100 0 L214 64" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="70" y="100" width="60" height="80" fill="#8e1c1c" stroke="#fff" stroke-width="5"/>
+    <path d="M70 100 L130 180 M130 100 L70 180" stroke="#fff" stroke-width="4"/>
+    <rect x="86" y="30" width="28" height="24" fill="#fff8e1" stroke="#fff" stroke-width="4"/>
+    <rect x="20" y="90" width="30" height="26" fill="#fff8e1" stroke="#fff" stroke-width="4"/>
+    <rect x="150" y="90" width="30" height="26" fill="#fff8e1" stroke="#fff" stroke-width="4"/>
+  </g>
+
+  <!-- loma de adelante -->
+  <path d="M0 330 Q400 280 800 320 T1200 300 L1200 400 L0 400 Z" fill="url(#loma2)"/>
+
+  <!-- cerca -->
+  <g fill="#fff3e0" stroke="#bcaaa4" stroke-width="2">
+    <rect x="0" y="282" width="1200" height="8"/>
+    <rect x="0" y="302" width="1200" height="8"/>
+    <rect x="30" y="268" width="12" height="62"/><rect x="150" y="268" width="12" height="62"/>
+    <rect x="270" y="268" width="12" height="62"/><rect x="390" y="268" width="12" height="62"/>
+    <rect x="510" y="268" width="12" height="62"/><rect x="630" y="268" width="12" height="62"/>
+    <rect x="750" y="268" width="12" height="62"/><rect x="870" y="268" width="12" height="62"/>
+    <rect x="990" y="268" width="12" height="62"/><rect x="1110" y="268" width="12" height="62"/>
+  </g>
+
+  <!-- pasto delante de la cerca -->
+  <path d="M0 326 Q400 310 800 330 T1200 320 L1200 400 L0 400 Z" fill="#689f38"/>
+
+  <!-- cerditos (delante de la cerca) -->
+  <use href="#cerdito" transform="translate(330 350)"/>
+  <use href="#cerdito" transform="translate(470 362) scale(0.7)"/>
+  <use href="#cerdito" transform="translate(640 356) scale(-0.85 0.85)"/>
+
+  <!-- florecitas -->
+  <g>
+    <circle cx="220" cy="380" r="5" fill="#fff"/><circle cx="226" cy="384" r="5" fill="#fff"/><circle cx="222" cy="382" r="3" fill="#ffca28"/>
+    <circle cx="560" cy="386" r="5" fill="#f8bbd0"/><circle cx="566" cy="390" r="5" fill="#f8bbd0"/><circle cx="562" cy="388" r="3" fill="#ffca28"/>
+    <circle cx="940" cy="382" r="5" fill="#fff"/><circle cx="946" cy="386" r="5" fill="#fff"/><circle cx="942" cy="384" r="3" fill="#ffca28"/>
+  </g>
+</svg>

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block titulo %}Usuarios{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3 titulo"><span class="icono-titulo"><i class="bi bi-people-fill"></i></span>Usuarios</h1>
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="table-responsive card shadow-sm">
+      <table class="table table-hover align-middle mb-0">
+        <thead><tr><th>Nombre</th><th>Usuario</th><th>Tipo</th><th></th></tr></thead>
+        <tbody>
+        {% for u in usuarios %}
+          <tr>
+            <td>{{ u.nombre }}</td>
+            <td>{{ u.usuario }}</td>
+            <td>{% if u.es_admin %}<span class="badge text-bg-dark">Administrador</span>{% else %}Trabajador{% endif %}</td>
+            <td class="text-end">
+              {% if u.id != g.usuario.id %}
+              <form method="post" action="{{ url_for('login.eliminar_usuario', id=u.id) }}"
+                    onsubmit='return confirm({{ ("¿Eliminar al usuario " ~ u.usuario ~ "?")|tojson }})'>
+                <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <form method="post" class="card card-body shadow-sm">
+      <h2 class="h5">Nuevo usuario</h2>
+      <label class="form-label">Nombre completo</label>
+      <input name="nombre" class="form-control mb-2" required>
+      <label class="form-label">Usuario (para entrar)</label>
+      <input name="usuario" class="form-control mb-2" required autocomplete="off">
+      <label class="form-label">Contraseña (mínimo 6 caracteres)</label>
+      <input name="clave" type="password" class="form-control mb-2" required minlength="6" autocomplete="new-password">
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="es_admin" id="es_admin">
+        <label class="form-check-label" for="es_admin">Es administrador (puede crear usuarios)</label>
+      </div>
+      <button class="btn btn-primario">Crear usuario</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Porcícola{% endblock %} · Porcícola</title>
+  <link rel="icon" href="{{ url_for('static', filename='img/logo.svg') }}" type="image/svg+xml">
+  <link href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+{# La clase "seccion-..." le da a cada sección su color (ver style.css) #}
+<body class="{% block clase_body %}seccion-{{ request.blueprint or 'inicio' }}{% endblock %}">
+  {% if g.usuario %}
+  <nav class="navbar navbar-expand-lg navbar-dark barra">
+    <div class="container">
+      <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url_for('inicio') }}">
+        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="">Porcícola
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="menu">
+        <ul class="navbar-nav me-auto">
+          {# (sección, página, ícono, texto). La sección de la página abierta se marca con "active". #}
+          {% for seccion, pagina, icono, texto in [
+                ("cerdos", "cerdos.lista", "piggy-bank-fill", "Cerdos"),
+                ("pesajes", "pesajes.lista", "graph-up-arrow", "Pesajes"),
+                ("salud", "salud.lista", "heart-pulse-fill", "Salud"),
+                ("reproduccion", "reproduccion.inicio", "balloon-heart-fill", "Reproducción"),
+                ("alimentacion", "alimentacion.lista", "basket2-fill", "Alimentación"),
+                ("salidas", "salidas.lista", "truck", "Salidas"),
+                ("corrales", "corrales.lista", "house-door-fill", "Corrales")] %}
+            <li class="nav-item">
+              <a class="nav-link {{ 'active fw-bold' if request.blueprint == seccion }}" href="{{ url_for(pagina) }}">
+                <i class="bi bi-{{ icono }}"></i>{{ texto }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle"></i> {{ g.usuario.nombre }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+              <li><a class="dropdown-item" href="{{ url_for('login.cambiar_clave') }}"><i class="bi bi-key me-2"></i>Cambiar contraseña</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('razas.lista') }}"><i class="bi bi-tags me-2"></i>Razas</a></li>
+              {% if g.usuario.es_admin %}
+              <li><a class="dropdown-item" href="{{ url_for('login.usuarios') }}"><i class="bi bi-people me-2"></i>Usuarios</a></li>
+              {% endif %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{{ url_for('login.salir') }}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  {% endif %}
+
+  <main class="container py-4">
+    {# Mensajes de aviso (flash) que mandan las rutas de Python #}
+    {% set iconos_aviso = {"success": "check-circle-fill", "danger": "exclamation-triangle-fill", "warning": "exclamation-circle-fill"} %}
+    {% for categoria, mensaje in get_flashed_messages(with_categories=true) %}
+      <div class="alert alert-{{ categoria }} alert-dismissible fade show shadow-sm border-0">
+        <i class="bi bi-{{ iconos_aviso.get(categoria, 'info-circle-fill') }} me-2"></i>{{ mensaje }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+
+    {% block contenido %}{% endblock %}
+  </main>
+
+  {% if g.usuario %}
+  <footer class="pie">Porcícola · registro de la granja 🐷</footer>
+  {% endif %}
+
+  <script src="{{ url_for('static', filename='vendor/bootstrap.bundle.min.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
